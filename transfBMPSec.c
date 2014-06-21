@@ -6,6 +6,7 @@
 // Prototipos
 unsigned char** crearArregloPixeles(int, int);
 
+// Estructura para el header de una imagen BMP de 24 bits.
 struct BMP_Header{
     char tipo[2];
     unsigned int tamanioArchivo;
@@ -25,6 +26,7 @@ struct BMP_Header{
     unsigned int numeroColoersImportantes;
 };
 
+
 int main(int argc, char** argv){
     char nombrePrimerImagen[35];
     char nombreSegundaImagen[35];
@@ -43,7 +45,7 @@ int main(int argc, char** argv){
     
     time_t comienzoTrabajo, finalizaTrabajo;
     
-    
+    // Controlo los argumentos con los que se llama el programa.
     if (argc == 3){
         strcpy(nombrePrimerImagen, argv[1]);
         strcpy(nombreSegundaImagen, argv[2]);
@@ -55,12 +57,10 @@ int main(int argc, char** argv){
     
     strcat(nombrePrimerImagenBlancoNegro, nombrePrimerImagen);
     strcat(nombreSegundaImagenBlancoNegro, nombreSegundaImagen);
-
+	
+	// Abro los archivos BMP para leer.
     punteroPrimerImagen = fopen(nombrePrimerImagen, "r");
     punteroSegundaImagen = fopen(nombreSegundaImagen, "r");
-    punteroPrimerImagenBlancoNegro = fopen(nombrePrimerImagenBlancoNegro, "w");
-    punteroSegundaImagenBlancoNegro = fopen(nombreSegundaImagenBlancoNegro, "w");
-    punteroImagenSalida = fopen(nombreImagenCombinada, "w");
 
     if (punteroPrimerImagen == NULL){
         printf("ERROR >> No se pudo abrir el archivo \"%s\" para lectura\n",nombrePrimerImagen);
@@ -71,22 +71,8 @@ int main(int argc, char** argv){
         printf("ERROR >> No se pudo abrir el archivo \"%s\" para lectura\n",nombreSegundaImagen);
         return 1;
     }
-
-    if (punteroPrimerImagenBlancoNegro == NULL){
-        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombrePrimerImagenBlancoNegro);
-        return 1;
-    }
-
-    if (punteroSegundaImagenBlancoNegro == NULL){
-        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombreSegundaImagenBlancoNegro);
-        return 1;
-    }
     
-    if (punteroImagenSalida == NULL){
-        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombreImagenCombinada);
-        return 1;
-    }
-
+    // Leo el header de la primer imagen.
     fread(&primerCabeceraBMP.tipo, sizeof (char), 2, punteroPrimerImagen);
     fread(&primerCabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroPrimerImagen);
     fread(&primerCabeceraBMP.reservado1, sizeof (unsigned short int), 1, punteroPrimerImagen);
@@ -104,7 +90,7 @@ int main(int argc, char** argv){
     fread(&primerCabeceraBMP.numeroColoresUsados, sizeof (unsigned int), 1, punteroPrimerImagen);
     fread(&primerCabeceraBMP.numeroColoersImportantes, sizeof (unsigned int), 1, punteroPrimerImagen);
       
-    
+    // Leo el header de la segunda imagen.
     fread(&segundaCabeceraBMP.tipo, sizeof (char), 2, punteroSegundaImagen);
     fread(&segundaCabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroSegundaImagen);
     fread(&segundaCabeceraBMP.reservado1, sizeof (unsigned short int), 1, punteroSegundaImagen);
@@ -122,34 +108,28 @@ int main(int argc, char** argv){
     fread(&segundaCabeceraBMP.numeroColoresUsados, sizeof (unsigned int), 1, punteroSegundaImagen);
     fread(&segundaCabeceraBMP.numeroColoersImportantes, sizeof (unsigned int), 1, punteroSegundaImagen);
     
-    
+    // Adelanto el puntero de los archivos para que apunten al comienzo del arreglo de pixeles.
+    // Debo adelantarlo desde el comienzo lo que dice el offset porque puede que el arreglo de pixeles no se encuentre inmediatamente despues del header.
     fseek(punteroPrimerImagen, primerCabeceraBMP.offsetArregloPixeles, SEEK_SET);
     fseek(punteroSegundaImagen, segundaCabeceraBMP.offsetArregloPixeles, SEEK_SET);
     
+    
     unsigned char red, green, blue;  
     
+    // Creo la matriz que tendra los pixeles de la primer imagen.
     int numFilasPrimerImagen = primerCabeceraBMP.altoBitMap;
     int numColPrimerImagen = primerCabeceraBMP.anchoBitMap * 3;
-    
-    int numFilasSegundaImagen = segundaCabeceraBMP.altoBitMap;
-    int numColSegundaImagen = segundaCabeceraBMP.anchoBitMap * 3;
     
     unsigned char **pixelesPrimerImagen = crearArregloPixeles(numFilasPrimerImagen, numColPrimerImagen);
     if (pixelesPrimerImagen == NULL){
 		printf("ERROR >> No se pudo crear el arreglo para los pixeles de la primer imagen.\n");
 		return 1;
 	}
-	
-    unsigned char **pixelesSegundaImagen = crearArregloPixeles(numFilasSegundaImagen, numColSegundaImagen);
-    if (pixelesSegundaImagen == NULL){
-		printf("ERROR >> No se pudo crear el arreglo para los pixeles de la segunda imagen.\n");
-		return 1;
-	}
-	
     
     int i, j;
     int valorPromedio = 0;
     
+    // Cargo la matriz de la primer imagen con los valores RGB de cada pixel de la primer imagen.
 	for (j=0; j<primerCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<primerCabeceraBMP.anchoBitMap; i++){
 			if (fread(&blue, sizeof(unsigned char), 1, punteroPrimerImagen) != 1){
@@ -167,6 +147,17 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	// Creo la matriz que tendra los pixeles de la segunda imagen.
+	int numFilasSegundaImagen = segundaCabeceraBMP.altoBitMap;
+    int numColSegundaImagen = segundaCabeceraBMP.anchoBitMap * 3;
+    
+    unsigned char **pixelesSegundaImagen = crearArregloPixeles(numFilasSegundaImagen, numColSegundaImagen);
+    if (pixelesSegundaImagen == NULL){
+		printf("ERROR >> No se pudo crear el arreglo para los pixeles de la segunda imagen.\n");
+		return 1;
+	}
+	
+	// Cargo la matriz de la segunda imagen con los valores RGB de cada pixel de la segunda imagen
 	for (j=0; j<segundaCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<segundaCabeceraBMP.anchoBitMap; i++){
 			if (fread(&blue, sizeof(unsigned char), 1, punteroSegundaImagen) != 1){
@@ -184,9 +175,12 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	
+	// Obtengo el tiempo de comienzo del trabajo que se compara.
 	comienzoTrabajo = time(NULL);
 	
 	
+	// Transformo la primer imagen a escala de grises.
 	for (j=0; j<primerCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<primerCabeceraBMP.anchoBitMap; i++){
 			blue = pixelesPrimerImagen[j][i*3];
@@ -202,6 +196,7 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	// Transformo la segunda imagen a escala de grises.
 	for (j=0; j<segundaCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<segundaCabeceraBMP.anchoBitMap; i++){
 			blue = pixelesSegundaImagen[j][i*3];
@@ -217,10 +212,22 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	// Obtengo el tiempo de fin del trabajo.
 	finalizaTrabajo = time(NULL);
 	
+	// Calculo el tiempo transcurrido.
 	double tiempoTranscurrido = difftime(finalizaTrabajo, comienzoTrabajo);
     
+    
+    // Abro el archivo para escribir la primer imagen en blanco y negro.
+    punteroPrimerImagenBlancoNegro = fopen(nombrePrimerImagenBlancoNegro, "w");
+    
+    if (punteroPrimerImagenBlancoNegro == NULL){
+        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombrePrimerImagenBlancoNegro);
+        return 1;
+    }
+    
+    // Escribo el header de la primer imagen en escala de grises.
     fwrite(&primerCabeceraBMP.tipo, sizeof (char), 2, punteroPrimerImagenBlancoNegro);
     fwrite(&primerCabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroPrimerImagenBlancoNegro);
     fwrite(&primerCabeceraBMP.reservado1, sizeof (unsigned short int), 1, punteroPrimerImagenBlancoNegro);
@@ -238,8 +245,10 @@ int main(int argc, char** argv){
     fwrite(&primerCabeceraBMP.numeroColoresUsados, sizeof (unsigned int), 1, punteroPrimerImagenBlancoNegro);
     fwrite(&primerCabeceraBMP.numeroColoersImportantes, sizeof (unsigned int), 1, punteroPrimerImagenBlancoNegro);	
 	
+	// Adelanto el puntero del archivo para que apunte al comienzo del arreglo de pixeles.
 	fseek(punteroPrimerImagenBlancoNegro, primerCabeceraBMP.offsetArregloPixeles, SEEK_SET);
 	
+	// Escribo la matriz de pixeles en el archivo de la primer imagen en escala de grises.
     for (j=0; j<primerCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<primerCabeceraBMP.anchoBitMap; i++){
 			fwrite(&pixelesPrimerImagen[j][i*3], sizeof(unsigned char), 1, punteroPrimerImagenBlancoNegro);
@@ -248,6 +257,16 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	
+	// Abro el archivo para escribir la segunda imagen en blanco y negro.
+	punteroSegundaImagenBlancoNegro = fopen(nombreSegundaImagenBlancoNegro, "w");
+	
+	if (punteroSegundaImagenBlancoNegro == NULL){
+        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombreSegundaImagenBlancoNegro);
+        return 1;
+    }
+	
+	// Escribo el header de la segunda imagen en escala de grises.
     fwrite(&segundaCabeceraBMP.tipo, sizeof (char), 2, punteroSegundaImagenBlancoNegro);
     fwrite(&segundaCabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroSegundaImagenBlancoNegro);
     fwrite(&segundaCabeceraBMP.reservado1, sizeof (unsigned short int), 1, punteroSegundaImagenBlancoNegro);
@@ -265,16 +284,29 @@ int main(int argc, char** argv){
     fwrite(&segundaCabeceraBMP.numeroColoresUsados, sizeof (unsigned int), 1, punteroSegundaImagenBlancoNegro);
     fwrite(&segundaCabeceraBMP.numeroColoersImportantes, sizeof (unsigned int), 1, punteroSegundaImagenBlancoNegro);	
 	
+	// Adelanto el puntero del archivo para que apunte al comienzo del arreglo de pixeles.
 	fseek(punteroSegundaImagenBlancoNegro, segundaCabeceraBMP.offsetArregloPixeles, SEEK_SET);
 	
+	// Escribo la matriz de pixeles en el archivo de la segunda imagen en escala de grises.
     for (j=0; j<segundaCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<segundaCabeceraBMP.anchoBitMap; i++){
 			fwrite(&pixelesSegundaImagen[j][i*3], sizeof(unsigned char), 1, punteroSegundaImagenBlancoNegro);
 			fwrite(&pixelesSegundaImagen[j][(i*3)+1], sizeof(unsigned char), 1, punteroSegundaImagenBlancoNegro);
 			fwrite(&pixelesSegundaImagen[j][(i*3)+2], sizeof(unsigned char), 1, punteroSegundaImagenBlancoNegro);
 		}
-	}	
+	}
+	
+	// Abro el archivo para escribir la imagen combinada.
+	punteroImagenSalida = fopen(nombreImagenCombinada, "w");
+	
+	if (punteroImagenSalida == NULL){
+        printf("ERROR >> No se pudo abrir el archivo \"%s\" para escritura\n",nombreImagenCombinada);
+        return 1;
+    }
 
+	// Escribo el header de la imagen de salida.
+	// Notar que el header sera identico al de la primer imagen ya que se supone que las imagenes de entrada al programa son las dos del mismo tamaño (asi las caracteristicas de la imagen seran las mismas).
+	// Se podria usar el header de la segunda imagen al igual que el de la primer.
     fwrite(&primerCabeceraBMP.tipo, sizeof (char), 2, punteroImagenSalida);
     fwrite(&primerCabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroImagenSalida);
     fwrite(&primerCabeceraBMP.reservado1, sizeof (unsigned short int), 1, punteroImagenSalida);
@@ -292,10 +324,16 @@ int main(int argc, char** argv){
     fwrite(&primerCabeceraBMP.numeroColoresUsados, sizeof (unsigned int), 1, punteroImagenSalida);
     fwrite(&primerCabeceraBMP.numeroColoersImportantes, sizeof (unsigned int), 1, punteroImagenSalida);	
 	
+	// Adelanto el puntero del archivo para que apunte al comienzo del arreglo de pixeles.
 	fseek(punteroImagenSalida, primerCabeceraBMP.offsetArregloPixeles, SEEK_SET);
 	
+	
+	// Obtengo el tiempo del comienzo de trabajo.
+	// Notar que esta es la segunda parte del trabajo que se compara con la version paralelizada.
 	comienzoTrabajo = time(NULL);
 	
+	
+	// Combino las dos imagenes en escala de grises en un sola.
 	for (j=0; j<primerCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<primerCabeceraBMP.anchoBitMap; i++){
 			pixelesPrimerImagen[j][i*3] = (pixelesPrimerImagen[j][i*3] + pixelesSegundaImagen[j][i*3]) / 2;
@@ -304,10 +342,14 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	// Obtengo el tiempo de fin del trabajo.
 	finalizaTrabajo = time(NULL);
 	
+	// Calculo el tiempo transcurrido.
+	// Notar que suma al tiempo transcurrido anterior el tiempo que tarda en obtener la combinacion de las imagenes.
 	tiempoTranscurrido += difftime(finalizaTrabajo, comienzoTrabajo);
 	
+	// Escribo el arreglo de pixeles en la imagen de salida.
 	for (j=0; j<primerCabeceraBMP.altoBitMap; j++){
 		for (i=0; i<primerCabeceraBMP.anchoBitMap; i++){
 			fwrite(&pixelesPrimerImagen[j][i*3], sizeof(unsigned char), 1, punteroImagenSalida);
@@ -316,6 +358,7 @@ int main(int argc, char** argv){
 		}
 	}
 	
+	// Muestro el tiempo transcurrido en realizar la tarea.
 	printf("%d, %d, %f\n", primerCabeceraBMP.anchoBitMap, primerCabeceraBMP.altoBitMap, tiempoTranscurrido);
 	
     return 0;
