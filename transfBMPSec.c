@@ -7,7 +7,6 @@
 unsigned char** crearArregloPixeles(int, int);
 
 // Estructura para el header de una imagen BMP de 24 bits.
-
 struct BMP_Header {
     char tipo[2];
     unsigned int tamanioArchivo;
@@ -145,6 +144,8 @@ int main(int argc, char** argv) {
             pixelesPrimerImagen[j][(i * 3) + 2] = red;
         }
     }
+    
+    fclose(punteroPrimerImagen);
 
     // Creo la matriz que tendra los pixeles de la segunda imagen.
     int numFilasSegundaImagen = segundaCabeceraBMP.altoBitMap;
@@ -173,6 +174,8 @@ int main(int argc, char** argv) {
             pixelesSegundaImagen[j][(i * 3) + 2] = red;
         }
     }
+    
+    fclose(punteroSegundaImagen);
 
 
     // Obtengo el tiempo de comienzo del trabajo que se compara.
@@ -255,6 +258,8 @@ int main(int argc, char** argv) {
             fwrite(&pixelesPrimerImagen[j][(i * 3) + 2], sizeof (unsigned char), 1, punteroPrimerImagenBlancoNegro);
         }
     }
+    
+    fclose(punteroPrimerImagenBlancoNegro);
 
 
     // Abro el archivo para escribir la segunda imagen en blanco y negro.
@@ -294,6 +299,8 @@ int main(int argc, char** argv) {
             fwrite(&pixelesSegundaImagen[j][(i * 3) + 2], sizeof (unsigned char), 1, punteroSegundaImagenBlancoNegro);
         }
     }
+    
+    fclose(punteroSegundaImagenBlancoNegro);
 
     // Abro el archivo para escribir la imagen combinada.
     punteroImagenSalida = fopen(nombreImagenCombinada, "w");
@@ -340,6 +347,8 @@ int main(int argc, char** argv) {
             pixelesPrimerImagen[j][(i * 3) + 2] = (pixelesPrimerImagen[j][(i * 3) + 2] + pixelesSegundaImagen[j][(i * 3) + 2]) / 2;
         }
     }
+    
+    free(pixelesSegundaImagen);
 
     // Obtengo el tiempo de fin del trabajo.
     finalizaTrabajo = time(NULL);
@@ -356,6 +365,10 @@ int main(int argc, char** argv) {
             fwrite(&pixelesPrimerImagen[j][(i * 3) + 2], sizeof (unsigned char), 1, punteroImagenSalida);
         }
     }
+    
+    free(pixelesPrimerImagen);
+    
+    fclose(punteroImagenSalida);
 
     // Muestro el tiempo transcurrido en realizar la tarea.
     printf("%d, %d, %f\n", primerCabeceraBMP.anchoBitMap, primerCabeceraBMP.altoBitMap, tiempoTranscurrido);
