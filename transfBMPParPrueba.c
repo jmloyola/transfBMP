@@ -467,6 +467,7 @@ unsigned char** crearArregloPixeles(int numFilas, int numCol) {
 
     for (i = 0; i < numFilas; i++) {
         //arreglo[i] = (unsigned char*) malloc(sizeof (unsigned char) * numCol);
+        // Se utiliza calloc en lugar de malloc para que cuando se combinan las imagenes el relleno de las imagenes sea cero y no basura.
         arreglo[i] = (unsigned char*) calloc(numCol, sizeof (unsigned char));
 
         if (arreglo[i] == NULL) {
