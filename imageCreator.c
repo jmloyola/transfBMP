@@ -5,6 +5,7 @@
 
 // Prototipos
 unsigned char** crearArregloPixeles(int, int);
+void crearPatron(unsigned char**, int, int, int);
 
 struct BMP_Header {
     char tipo[2];
@@ -26,19 +27,22 @@ struct BMP_Header {
 };
 
 int main(int argc, char** argv) {
-    char nombrePrimerImagen[35] = "\0";
-    char nombreSegundaImagen[35] = "\0";
+    char nombrePrimerImagen[35] = "";
+    char nombreSegundaImagen[35] = "";
     int anchoImagen;
     int altoImagen;
     struct BMP_Header cabeceraBMP;
     FILE *punteroPrimerImagen = NULL;
     FILE *punteroSegundaImagen = NULL;
+    int patronPrimerImagen, patronSegundaImagen;
 
-    if (argc == 3) {
+    if (argc == 5) {
         anchoImagen = atoi(argv[1]);
         altoImagen = atoi(argv[2]);
+        patronPrimerImagen= atoi(argv[3]);
+        patronSegundaImagen= atoi(argv[4]);
     } else {
-        printf("ERROR >> El programa debe ser invocado con dos parametros indicando el ancho, y alto de las imagenes a crear.\n");
+        printf("ERROR >> El programa debe ser invocado con cuatro parametros indicando el ancho, alto y patrones de las imagenes a crear.\n");
         return 1;
     }
 
@@ -84,90 +88,6 @@ int main(int argc, char** argv) {
     cabeceraBMP.numeroColoresUsados = 0;
     cabeceraBMP.numeroColoersImportantes = 0;
 
-    int numFilas = altoImagen;
-    int numCol = anchoImagen * 3;
-
-    unsigned char **pixelesPrimerImagen = crearArregloPixeles(numFilas, numCol);
-    if (pixelesPrimerImagen == NULL) {
-        printf("ERROR >> No se pudo crear el arreglo para los pixeles de la primer imagen.\n");
-        return 1;
-    }
-
-    unsigned char **pixelesSegundaImagen = crearArregloPixeles(numFilas, numCol);
-    if (pixelesSegundaImagen == NULL) {
-        printf("ERROR >> No se pudo crear el arreglo para los pixeles de la segunda imagen.\n");
-        return 1;
-    }
-
-    int i, j;
-
-    srand(time(NULL));
-
-    //int divisionPrimerRandom = (rand() % (anchoImagen / 2)) + 10;
-    int divisionPrimerRandom = anchoImagen / 2;
-    //int longitudPrimerRandom = (rand() % 8) + 5;
-    int longitudPrimerRandom = 2;
-    int bluePrimerRandom = rand() % 255;
-    int greenPrimerRandom = rand() % 255;
-    int redPrimerRandom = rand() % 255;
-
-    //int divisionSegundoRandom = (rand() % (altoImagen / 2)) + 10;
-    int divisionSegundoRandom = altoImagen / 2;
-    //int longitudSegundoRandom = (rand() % 8) + 5;
-    int longitudSegundoRandom = 2;
-    int blueSegundoRandom = rand() % 255;
-    int greenSegundoRandom = rand() % 255;
-    int redSegundoRandom = rand() % 255;
-
-    for (j = 0; j < cabeceraBMP.altoBitMap; j++) {
-        for (i = 0; i < cabeceraBMP.anchoBitMap; i++) {
-            /*if ((i % divisionPrimerRandom) <= longitudPrimerRandom){
-                    pixelesPrimerImagen[j][i*3] = (unsigned char)((bluePrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
-                    pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)((greenPrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
-                    pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)((redPrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
-            }
-            else{
-                    pixelesPrimerImagen[j][i*3] = (unsigned char)(rand() % 255);
-                    pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)(rand() % 255);
-                    pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)(rand() % 255);
-            }*/
-            /*if ((i >= divisionPrimerRandom - longitudPrimerRandom) && (i <= divisionPrimerRandom + longitudPrimerRandom)){
-                    pixelesPrimerImagen[j][i*3] = (unsigned char)((bluePrimerRandom + i) % 255);
-                    pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)((greenPrimerRandom + i) % 255);
-                    pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)((redPrimerRandom + i) % 255);
-            }
-            else{*/
-            pixelesPrimerImagen[j][i * 3] = (unsigned char) (rand() % 255);
-            pixelesPrimerImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
-            pixelesPrimerImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
-            /*}*/
-        }
-    }
-
-    for (j = 0; j < cabeceraBMP.altoBitMap; j++) {
-        for (i = 0; i < cabeceraBMP.anchoBitMap; i++) {
-            /*if ((j % divisionSegundoRandom) <= longitudSegundoRandom){
-                    pixelesSegundaImagen[j][i*3] = (unsigned char)((blueSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
-                    pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)((greenSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
-                    pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)((redSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
-            }
-            else{
-                    pixelesSegundaImagen[j][i*3] = (unsigned char)(rand() % 255);
-                    pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)(rand() % 255);
-                    pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)(rand() % 255);
-            }*/
-            /*if ((j >= divisionSegundoRandom - longitudSegundoRandom) && (j <= divisionSegundoRandom + longitudSegundoRandom)){
-                    pixelesSegundaImagen[j][i*3] = (unsigned char)((blueSegundoRandom + j) % 255);
-                    pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)((greenSegundoRandom + j) % 255);
-                    pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)((redSegundoRandom + j) % 255);
-            }
-            else{*/
-            pixelesSegundaImagen[j][i * 3] = (unsigned char) (rand() % 255);
-            pixelesSegundaImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
-            pixelesSegundaImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
-            /*}*/
-        }
-    }
 
     fwrite(&cabeceraBMP.tipo, sizeof (char), 2, punteroPrimerImagen);
     fwrite(&cabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroPrimerImagen);
@@ -188,6 +108,28 @@ int main(int argc, char** argv) {
 
     fseek(punteroPrimerImagen, cabeceraBMP.offsetArregloPixeles, SEEK_SET);
 
+
+    int numFilas = altoImagen;
+    int numCol = anchoImagen * 3;
+
+    unsigned char **pixelesPrimerImagen = crearArregloPixeles(numFilas, numCol);
+    if (pixelesPrimerImagen == NULL) {
+        printf("ERROR >> No se pudo crear el arreglo para los pixeles de la primer imagen.\n");
+        return 1;
+    }
+
+    unsigned char **pixelesSegundaImagen = crearArregloPixeles(numFilas, numCol);
+    if (pixelesSegundaImagen == NULL) {
+        printf("ERROR >> No se pudo crear el arreglo para los pixeles de la segunda imagen.\n");
+        return 1;
+    }
+
+
+    crearPatron(pixelesPrimerImagen, anchoImagen, altoImagen, patronPrimerImagen);
+    crearPatron(pixelesSegundaImagen, anchoImagen, altoImagen, patronSegundaImagen);
+
+    int i, j;
+    
     for (j = 0; j < cabeceraBMP.altoBitMap; j++) {
         for (i = 0; i < cabeceraBMP.anchoBitMap; i++) {
             fwrite(&pixelesPrimerImagen[j][i * 3], sizeof (unsigned char), 1, punteroPrimerImagen);
@@ -201,7 +143,7 @@ int main(int argc, char** argv) {
     }
     free(pixelesPrimerImagen);
 
-    free(punteroPrimerImagen);
+    fclose(punteroPrimerImagen);
 
     fwrite(&cabeceraBMP.tipo, sizeof (char), 2, punteroSegundaImagen);
     fwrite(&cabeceraBMP.tamanioArchivo, sizeof (unsigned int), 1, punteroSegundaImagen);
@@ -235,7 +177,7 @@ int main(int argc, char** argv) {
     }
     free(pixelesSegundaImagen);
 
-    free(punteroSegundaImagen);
+    fclose(punteroSegundaImagen);
 
     return 0;
 }
@@ -261,4 +203,181 @@ unsigned char** crearArregloPixeles(int numFilas, int numCol) {
     }
 
     return arreglo;
+}
+
+void crearPatron(unsigned char** pixelesImagen, int anchoImagen, int altoImagen, int opcion){
+    int divisionAnchoRandom = anchoImagen / 2;
+    int divisionAltoRandom = altoImagen / 2;
+    int longitudRandom = anchoImagen / 10;
+    int blueRandom;
+    int greenRandom;
+    int redRandom;
+
+    int i,j;
+    
+    srand(time(NULL));
+    
+    blueRandom = rand() % 255;
+    greenRandom = rand() % 255;
+    redRandom = rand() % 255;  
+    
+    switch (opcion){
+        case 0:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if ((i >= divisionAnchoRandom - longitudRandom) && (i <= divisionAnchoRandom + longitudRandom)){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + i) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        case 1:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if ((j >= divisionAltoRandom - longitudRandom) && (j <= divisionAltoRandom + longitudRandom)){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + j) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        case 2:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if ((i % divisionAnchoRandom) <= longitudRandom){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + i) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        case 3:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if ((j % divisionAltoRandom) <= longitudRandom){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + j) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        case 4:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if (i <= divisionAnchoRandom){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + i) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + i) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        case 5:{
+            for (j = 0; j < altoImagen; j++){
+                for (i = 0; i < anchoImagen; i++){
+                    if (j <= divisionAltoRandom){
+                        pixelesImagen[j][i*3] = (unsigned char)((blueRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+1] = (unsigned char)((greenRandom + j) % 255);
+                        pixelesImagen[j][(i*3)+2] = (unsigned char)((redRandom + j) % 255);
+                    }
+                    else{
+                        pixelesImagen[j][i * 3] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+                        pixelesImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+                    }
+                }
+            }
+            break;
+        }
+        default:{
+        }
+    }
+    
+    
+    
+    /*
+    for (j = 0; j < cabeceraBMP.altoBitMap; j++) {
+        for (i = 0; i < cabeceraBMP.anchoBitMap; i++) {
+            //if ((i % divisionPrimerRandom) <= longitudPrimerRandom){
+            //        pixelesPrimerImagen[j][i*3] = (unsigned char)((bluePrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
+            //        pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)((greenPrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
+            //        pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)((redPrimerRandom + ((i % divisionPrimerRandom)*8)) % 255);
+            //}
+            //else{
+            //        pixelesPrimerImagen[j][i*3] = (unsigned char)(rand() % 255);
+            //        pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)(rand() % 255);
+            //        pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)(rand() % 255);
+            //}
+            if ((i >= divisionPrimerRandom - longitudPrimerRandom) && (i <= divisionPrimerRandom + longitudPrimerRandom)){
+                    pixelesPrimerImagen[j][i*3] = (unsigned char)((bluePrimerRandom + i) % 255);
+                    pixelesPrimerImagen[j][(i*3)+1] = (unsigned char)((greenPrimerRandom + i) % 255);
+                    pixelesPrimerImagen[j][(i*3)+2] = (unsigned char)((redPrimerRandom + i) % 255);
+            }
+            else{
+            pixelesPrimerImagen[j][i * 3] = (unsigned char) (rand() % 255);
+            pixelesPrimerImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+            pixelesPrimerImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+            }
+        }
+    }*/
+/*
+    for (j = 0; j < cabeceraBMP.altoBitMap; j++) {
+        for (i = 0; i < cabeceraBMP.anchoBitMap; i++) {
+            //if ((j % divisionSegundoRandom) <= longitudSegundoRandom){
+            //        pixelesSegundaImagen[j][i*3] = (unsigned char)((blueSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
+            //        pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)((greenSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
+            //        pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)((redSegundoRandom + ((j % divisionSegundoRandom)*8)) % 255);
+            //}
+            //else{
+            //        pixelesSegundaImagen[j][i*3] = (unsigned char)(rand() % 255);
+            //       pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)(rand() % 255);
+            //        pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)(rand() % 255);
+            //}
+            if ((j >= divisionSegundoRandom - longitudSegundoRandom) && (j <= divisionSegundoRandom + longitudSegundoRandom)){
+                    pixelesSegundaImagen[j][i*3] = (unsigned char)((blueSegundoRandom + j) % 255);
+                    pixelesSegundaImagen[j][(i*3)+1] = (unsigned char)((greenSegundoRandom + j) % 255);
+                    pixelesSegundaImagen[j][(i*3)+2] = (unsigned char)((redSegundoRandom + j) % 255);
+            }
+            else{
+            pixelesSegundaImagen[j][i * 3] = (unsigned char) (rand() % 255);
+            pixelesSegundaImagen[j][(i * 3) + 1] = (unsigned char) (rand() % 255);
+            pixelesSegundaImagen[j][(i * 3) + 2] = (unsigned char) (rand() % 255);
+            }
+        }
+    }*/
 }
